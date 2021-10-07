@@ -21,7 +21,7 @@ async def test():
     await client.connect('http://localhost:8000')
     done = asyncio.Future()
     await client.emit("generate_points",
-                      data={"quantity": 30, "sleep": 0},
+                      data={"quantity": 100, "sleep": 0},
                       callback=lambda: done.set_result(True))
     client.on("disconnect", handler=lambda: done.set_exception(ConnectionError))
     data = []

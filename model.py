@@ -1,7 +1,7 @@
 from enum import Enum
 from random import uniform
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conint, confloat
 
 
 class RandomType(str, Enum):
@@ -16,19 +16,19 @@ class RandomType(str, Enum):
         return randoms[self.value]
 
 
-class NumbersQuery(BaseModel):
-    quantity: int = 11
-    min_y: float = 1
-    max_y: float = 6
-    sleep: float = 0.5
+class RandomQuery(BaseModel):
+    quantity: conint(ge=2) = 11
+    sleep: confloat(ge=0) = 0.5
     random: RandomType = RandomType.uniform
 
 
-class PointsQuery(BaseModel):
-    quantity: int = 11
+class NumbersQuery(RandomQuery):
+    min_y: float = 1
+    max_y: float = 6
+
+
+class PointsQuery(RandomQuery):
     min_x: float = 0
     max_x: float = 10
     min_y: float = 1
     max_y: float = 6
-    sleep: float = 0.5
-    random: RandomType = RandomType.uniform
