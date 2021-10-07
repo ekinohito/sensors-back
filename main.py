@@ -15,7 +15,7 @@ def read_root():
 
 
 # create a Socket.IO server
-sio = socketio.AsyncServer(engineio_logger=True, async_mode='asgi')
+sio = socketio.AsyncServer(engineio_logger=True, async_mode='asgi', cors_allowed_origins='*')
 
 
 @sio.event
