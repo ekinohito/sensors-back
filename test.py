@@ -2,6 +2,7 @@ import asyncio
 
 from socketio import AsyncClient
 from socketio.exceptions import ConnectionError
+from matplotlib import pyplot as plt
 
 client = AsyncClient()
 
@@ -19,9 +20,15 @@ def new_point(data=None):
 async def test():
     await client.connect('http://localhost:8000')
     done = asyncio.Future()
-    await client.emit("generate_points", data={"quantity": 100}, callback=lambda: done.set_result(True))
+    await client.emit("generate_points",
+                      data={"quantity": 30, "sleep": 0},
+                      callback=lambda: done.set_result(True))
     client.on("disconnect", handler=lambda: done.set_exception(ConnectionError))
+    data = []
+    client.on("new_point", handler=lambda point: data.append(point))
     await done
+    plt.plot([point["x"] for point in data], [point["y"] for point in data])
+    plt.show()
 
 
 if __name__ == '__main__':
