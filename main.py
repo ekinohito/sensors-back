@@ -19,6 +19,12 @@ sio = socketio.AsyncServer(engineio_logger=True, async_mode='asgi', cors_allowed
 
 
 @sio.event
+async def connect(sid, envir):
+    async with sio.session(sid) as session:
+        session["points_id"] = 0
+
+
+@sio.event
 async def generate_numbers(sid, data=None):
     try:
         data = NumbersQuery(**data) if type(data) is dict else NumbersQuery()
@@ -40,7 +46,13 @@ async def generate_points(sid, data=None):
     x = data.min_x
     dx = (data.max_x - data.min_x) / (data.quantity - 1)
     y = (data.min_y + data.max_y) / 2
+    async with sio.session(sid) as session:
+        session["points_id"] += 1
+        points_id = session["points_id"]
     for i in range(data.quantity):
+        async with sio.session(sid) as session:
+            if points_id != session["points_id"]:
+                break
         y = data.random(min_y=data.min_y, max_y=data.max_y, prev=y)
         await sio.emit("new_point", data={"x": x, "y": y}, to=sid)
         await asyncio.sleep(data.sleep)
