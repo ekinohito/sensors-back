@@ -19,7 +19,7 @@ sio = socketio.AsyncServer(engineio_logger=True, async_mode='asgi', cors_allowed
 
 
 @sio.event
-async def connect(sid, envir):
+async def connect(sid, _):
     async with sio.session(sid) as session:
         session["points_id"] = 0
 
@@ -49,6 +49,7 @@ async def generate_points(sid, data=None):
     async with sio.session(sid) as session:
         session["points_id"] += 1
         points_id = session["points_id"]
+    await sio.emit("new_graph", data={"id": points_id}, to=sid)
     for i in range(data.quantity):
         async with sio.session(sid) as session:
             if points_id != session["points_id"]:
@@ -57,6 +58,12 @@ async def generate_points(sid, data=None):
         await sio.emit("new_point", data={"x": x, "y": y}, to=sid)
         await asyncio.sleep(data.sleep)
         x += dx
+
+
+@sio.event
+async def stop_generation(sid, _=None):
+    async with sio.session(sid) as session:
+        session["points_id"] += 1
 
 
 # wrap with ASGI application
